@@ -39,7 +39,7 @@ export default class ToDo extends Component {
 
         {isEditing ? (
           <View style={styles.actions}>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={this._finishEditing}>
               <View style={styles.actionContainer}>
                 <Text style={styles.actionText}>✅</Text>
               </View>
@@ -47,7 +47,7 @@ export default class ToDo extends Component {
           </View>
         ) : (
           <View style={styles.actions}>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={this._startEditing}>
               <View style={styles.actionContainer}>
                 <Text style={styles.actionText}>✏️</Text>
               </View>
@@ -67,6 +67,18 @@ export default class ToDo extends Component {
       return {
         isCompleted: !prevState.isCompleted
       };
+    });
+  };
+
+  _startEditing = () => {
+    this.setState({
+      isEditing: true
+    });
+  };
+
+  _finishEditing = () => {
+    this.setState({
+      isEditing: false
     });
   };
 }
@@ -110,5 +122,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: width / 2,
     justifyContent: "space-between"
+  },
+  actions: {
+    flexDirection: "row"
+  },
+  actionContainer: {
+    marginVertical: 10,
+    marginHorizontal: 10
   }
 });
