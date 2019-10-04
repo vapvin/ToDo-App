@@ -12,42 +12,97 @@ import {
 
 import { AppLoading } from "expo";
 import ToDo from "./ToDo";
+import uuidv1 from "uuid/v1";
 
 const { height, width } = Dimensions.get("window");
 
-export default function App() {
+export default class App extends React.Component {
   state = {
     newToDo: "",
-    loadedToDos: false
+    loadedToDos: false,
+    toDos: {}
   };
 
-  const { newToDo, loadedToDos } = this.state;
-  if (!loadedToDos) {
-    return <AppLoading />;
-  }
-  return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
-      <Text style={styles.title}>Kawai To Do</Text>
-      <View style={styles.card}>
-        <TextInput
-          style={styles.input}
-          placeholder="New To Do"
-          value={newToDo}
-          onChangeText={this._controllNewToDo}
-          placeholderTextColor={"#999"}
-          returnKeyType="done"
-          autoCorrect={false}
-        />
-        <ScrollView contentContainerStyle={styles.toDos}>
-          <ToDo text="Hello I'm a ToDo" />
-        </ScrollView>
+  componentDidMount = () => {
+    this._loadToDos();
+  };
+
+  render() {
+    const { newToDo, loadedToDos, toDos } = this.state;
+    if (!loadedToDos) {
+      return <AppLoading />;
+    }
+    return (
+      <View style={styles.container}>
+        <StatusBar barStyle="light-content" />
+        <Text style={styles.title}>Kawai To Do</Text>
+        <View style={styles.card}>
+          <TextInput
+            style={styles.input}
+            placeholder="New To Do"
+            value={newToDo}
+            onChangeText={this._controllNewToDo}
+            placeholderTextColor={"#999"}
+            returnKeyType="done"
+            autoCorrect={false}
+            onSubmitEditing={this._addToDo}
+          />
+          <ScrollView contentContainerStyle={styles.toDos}>
+            {Object.values(toDos).map(toDo => (
+              <ToDo key={toDo.id} {...toDo} deleteToDo={this._deleteToDo} />
+            ))}
+          </ScrollView>
+        </View>
       </View>
-    </View>
-  );
+    );
+  }
   _controllNewToDo = text => {
     this.setState({
       newToDo: text
+    });
+  };
+
+  _loadToDos = () => {
+    this.setState({
+      loadedToDos: true
+    });
+  };
+
+  _addToDo = () => {
+    const { newToDo } = this.state;
+    if (newToDo !== "") {
+      this.setState(prevState => {
+        const ID = uuidv1();
+        const newToDoObject = {
+          [ID]: {
+            id: ID,
+            isCompleted: false,
+            text: newToDo,
+            createAt: Date.now()
+          }
+        };
+        const newState = {
+          ...prevState,
+          newToDo: "",
+          toDos: {
+            ...prevState.toDos,
+            ...newToDoObject
+          }
+        };
+        return { ...newState };
+      });
+    }
+  };
+
+  _deleteToDo = id => {
+    this.setState(prevState => {
+      const toDos = prevState.toDos;
+      delete toDos[id];
+      const newState = {
+        ...prevState,
+        ...toDos
+      };
+      return { ...newState };
     });
   };
 }
